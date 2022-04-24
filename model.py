@@ -106,8 +106,10 @@ class UnetModel(tf.keras.Model):
 
         return output
     def loss(self, preds, labels):
-        #loss_numerator = -2 * tf.numpy_function(tf_sum,tf.numpy_function(tf_dot, [mask,predictions], tf.float32),tf.float32)
         loss_numerator = -2 * tf.math.reduce_sum(tf.tensordot(preds,labels))
         loss_denom = tf.reduce_sum(preds)+tf.reduce_sum(labels)+1
         return loss_numerator/loss_denom
-    # def accuracy(self, preds,labels):
+    def accuracy(self, preds,labels):
+        intersection = np.count_nonzero(preds==labels) 
+        union = np.count_nonzero(preds)+np.count_nonzero(labels)
+        return intersection/union
