@@ -11,10 +11,11 @@ class UnetModel(tf.keras.Model):
         self.batch_size = 128
         self.leaky_relu_rate =.1
         self.leaky = LeakyReLU(self.leaky_relu_rate)
+        self.img_height =512
    
         self.model = Sequential()
         #s = Lambda(lambda x: x / 255)(inputs)
-        
+        self.inputs = Input((self.batch_size,512,512,1 ))
         self.block1conv1 = Conv2D(16, (3, 3), activation = self.leaky, kernel_initializer='random_normal', padding='same')
         self.block1norm1 = BatchNormalization()
         self.block1conv2 = Conv2D(16, (3, 3), activation = self.leaky, kernel_initializer='random_normal', padding='same')
@@ -79,7 +80,7 @@ class UnetModel(tf.keras.Model):
         self.outputs = Conv2D(1, (1, 1), activation='sigmoid')
     def call(self, inputs):
         # implement downsample layers
-        block1output = self.block1pool(self.block1norm2(self.block1conv2(self.block1norm1(self.block1conv1(inputs)))))
+        block1output = self.block1pool(self.block1norm2(self.block1conv2(self.block1norm1(self.block1conv1(self.inputs(inputs))))))
         block2output = self.block2pool(self.block2norm2(self.block2conv2(self.block2norm1(self.block2conv1(block1output)))))
         block3output = self.block3pool(self.block3norm2(self.block3conv2(self.block3norm1(self.block3conv1(block2output)))))
         block4output = self.block4pool(self.block4norm2(self.block4conv2(self.block4norm1(self.block4conv1(block3output)))))
@@ -145,7 +146,7 @@ def train_and_checkpoint(net, manager, ckpt, inputs,labels):
         batch_images = inputs[i:i+net.batch_size]
         batch_labels = labels[i:i+net.batch_size]
         with tf.GradientTape() as tape:
-            predictions = net(inputs)
+            predictions = net.call(inputs)
             loss_num = net.loss(predictions, batch_labels)
         loss_list.append(loss_num)
         gradients = tape.gradient(loss_num,net.trainable_variables)
