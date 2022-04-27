@@ -13,7 +13,6 @@ class UnetModel(tf.keras.Model):
         self.leaky = LeakyReLU(self.leaky_relu_rate)
         self.img_height =512
    
-        self.model = Sequential()
         #s = Lambda(lambda x: x / 255)(inputs)
         self.inputs =InputLayer(input_shape=(512,512,1),batch_size=self.batch_size)
         self.block1conv1 = Conv2D(16, (3, 3), activation = self.leaky, kernel_initializer='random_normal', padding='same')
