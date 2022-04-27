@@ -12,7 +12,7 @@ def get_data(i_val):
     BASE_FILE_PATH = "./archive/"
 
     SEGMENTATION_PATH = BASE_FILE_PATH+'segmentations/'
-
+    i_val=1
     img_slices = []
     labels = []
     for i in range(0,i_val): #change this value 
