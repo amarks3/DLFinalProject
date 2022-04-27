@@ -58,7 +58,6 @@ def get_data(i_val):
 """
     new_arr = image.reshape(-1, image.shape[-1])
     print(np.shape(new_arr))
-
     mask = np.reshape(mask, (-1,512,512))
     print(np.shape(new_arr))
 """
@@ -83,4 +82,3 @@ def printNewImgVals(new_img_slice):
     for i in range(len(new_img_slice)): 
         for j in range(len(new_img_slice[0])):
             print(new_img_slice[i,j])
-    
