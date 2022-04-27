@@ -113,3 +113,45 @@ class UnetModel(tf.keras.Model):
         intersection = np.count_nonzero(preds==labels) 
         union = np.count_nonzero(preds)+np.count_nonzero(labels)
         return intersection/union
+
+# def train(model, inputs, labels):
+#     loss_list= list()
+#     x = len(inputs)//model.batch_size
+#     inputs= inputs[:x*model.batch_size]
+#     labels = inputs[:x*model.batch_size]
+#     combined_inputs_labels = zip(inputs,labels)
+#     for i in range(0,x*model.batch_size, model.batch_size):
+
+#         batch_images = inputs[i:i+model.batch_size]
+#         batch_labels = labels[i:i+model.batch_size]
+#         with tf.GradientTape() as tape:
+#             predictions = model(inputs)
+#             loss_num = model.loss(predictions, batch_labels)
+#         loss_list.append(loss_num)
+#         gradients = tape.gradient(loss_num,model.trainable_variables)
+#         model.optimizer.apply_gradients(zip(gradients,model.trainable_variables))
+def train_and_checkpoint(net, manager, ckpt, inputs,labels):
+    loss_list= list()
+    x = len(inputs)//net.batch_size
+    inputs= inputs[:x*net.batch_size]
+    labels = inputs[:x*net.batch_size]
+    combined_inputs_labels = zip(inputs,labels)
+    ckpt.restore(manager.latest_checkpoint)
+    if manager.latest_checkpoint:
+        print("Restored from {}".format(manager.latest_checkpoint))
+    else:
+        print("Initializing from scratch.")
+    for i in range(0,x*net.batch_size,  net.batch_size):
+        batch_images = inputs[i:i+net.batch_size]
+        batch_labels = labels[i:i+net.batch_size]
+        with tf.GradientTape() as tape:
+            predictions = net(inputs)
+            loss_num = net.loss(predictions, batch_labels)
+        loss_list.append(loss_num)
+        gradients = tape.gradient(loss_num,net.trainable_variables)
+        net.optimizer.apply_gradients(zip(gradients,net.trainable_variables))
+        ckpt.step.assign_add(1)
+        if int(ckpt.step) % 10 == 0:
+            save_path = manager.save()
+            print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
+            print("loss {:1.2f}".format(loss_num.numpy()))

@@ -4,14 +4,19 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 
 
-def get_data(i): 
+def get_data(i_val): 
+    """
+    Returns the images and labels as a tuple 
+    """
 
     BASE_FILE_PATH = "./archive/"
 
     SEGMENTATION_PATH = BASE_FILE_PATH+'segmentations/'
 
     img_slices = []
-    for i in range(0,5): #change this value 
+    labels = []
+    for i in range(0,i_val): #change this value 
+        print("i: ", i )
         segmentation_file = SEGMENTATION_PATH + 'segmentation-'+str(i)+'.nii'
         folder_num=1
         if i <11:
@@ -35,22 +40,24 @@ def get_data(i):
         #Slice images
         slc_nonzero_val = {}
         z_len = image.shape[2]
+        #print("lengths ", z_len, mask.shape[2])
         for j in range(z_len):
             new_img_slice = image[:,:,j]
-            if not np.all(new_img_slice < 0): 
+            new_label_slice = mask[:,:,j]
+            if not np.all(new_label_slice == 0): 
                 slc_nonzero_val[i] = j
                 img_slices.append(new_img_slice) #adds to new_img_slice only if there is some nonnegative value found 
+                labels.append(new_label_slice) #adds labels if adding new image 
             
             # **can call save_vals function here**
 
 
-    return img_slices
+    return img_slices, labels
 
 #Compression of images 3D --> 2D through reshape
 """
     new_arr = image.reshape(-1, image.shape[-1])
     print(np.shape(new_arr))
-
     mask = np.reshape(mask, (-1,512,512))
     print(np.shape(new_arr))
 """
@@ -75,4 +82,3 @@ def printNewImgVals(new_img_slice):
     for i in range(len(new_img_slice)): 
         for j in range(len(new_img_slice[0])):
             print(new_img_slice[i,j])
-    
