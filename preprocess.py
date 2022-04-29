@@ -1,7 +1,9 @@
 import os
+from tkinter import Y
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
+import h5py
 
 
 def get_data(i_val): 
@@ -48,8 +50,9 @@ def get_data(i_val):
                 slc_nonzero_val[i] = j
                 img_slices.append(new_img_slice) #adds to new_img_slice only if there is some nonnegative value found 
                 labels.append(new_label_slice) #adds labels if adding new image 
+                # **can call save_vals function here**
+                save_vals(new_img_slice, new_label_slice)
             
-            # **can call save_vals function here**
 
 
     return img_slices, labels
@@ -62,21 +65,23 @@ def get_data(i_val):
     print(np.shape(new_arr))
 """
 
-def save_vals(new_img_slice, i, j): 
+def save_vals(X_train_data, Y_train_labels): 
     """
     Saves values for recorded and unrecorded data in a file according to whether there is some positive value found in the image which would 
     represent a tumor
     Inputs: i - Val of image we are on; j - z-value on axis 
     Returns: None 
     """
-    if not np.all(new_img_slice < 0): 
-        f = open("recorded.txt", "a")
-        f.write(f"{i},  {j} \n")
-        f.close() 
-    else: 
-        f = open("ignored.txt", "a")
-        f.write(f"{i}, {j} \n")
-        f.close()
+    with h5py.File('.\PreprocessedData.h5', 'w') as hf:
+        hf.create_dataset("X_train", data=X_train_data)
+        hf.create_dataset("Y_train", data=Y_train_labels)
+
+    """f = open("recorded.txt", "a")
+    f.write(f"{i},  {j} \n")
+    f.close() """
+    """f = open("ignored.txt", "a")
+    f.write(f"{i}, {j} \n")
+    f.close()"""
 
 def printNewImgVals(new_img_slice): 
     for i in range(len(new_img_slice)): 
